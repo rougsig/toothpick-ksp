@@ -23,6 +23,7 @@ import toothpick.compiler.compilationAssert
 import toothpick.compiler.compilesWithoutError
 import toothpick.compiler.expectedKtSource
 import toothpick.compiler.failsToCompile
+import toothpick.compiler.failsToProcess
 import toothpick.compiler.generatesSources
 import toothpick.compiler.javaSource
 import toothpick.compiler.ktSource
@@ -736,7 +737,7 @@ class FieldMemberInjectorTest {
             import javax.inject.Inject;
             import toothpick.Lazy;
             public class TestFieldInjection {
-              @Inject Lazy<Foo> foo;
+              @Inject Lazy<Foo<Object>> foo;
               public TestFieldInjection() {}
             }
             class Foo<T> {}
@@ -1050,7 +1051,7 @@ class FieldMemberInjectorTest {
         compilationAssert()
             .that(source)
             .processedWith(MemberInjectorProcessorProvider())
-            .failsToCompile()
+            .failsToProcess()
             .withLogContaining("Type of test.TestFieldInjection.foo is not a valid toothpick.Lazy.")
     }
 
@@ -1071,7 +1072,7 @@ class FieldMemberInjectorTest {
         compilationAssert()
             .that(source)
             .processedWith(MemberInjectorProcessorProvider())
-            .failsToCompile()
+            .failsToProcess()
             .withLogContaining("Type of test.TestFieldInjection.foo is not a valid toothpick.Lazy.")
     }
 
@@ -1094,7 +1095,7 @@ class FieldMemberInjectorTest {
         compilationAssert()
             .that(source)
             .processedWith(MemberInjectorProcessorProvider())
-            .failsToCompile()
+            .failsToProcess()
             .withLogContaining(
                 "Type of test.TestFieldInjection.foo is not a valid javax.inject.Provider."
             )
@@ -1117,7 +1118,7 @@ class FieldMemberInjectorTest {
         compilationAssert()
             .that(source)
             .processedWith(MemberInjectorProcessorProvider())
-            .failsToCompile()
+            .failsToProcess()
             .withLogContaining(
                 "Type of test.TestFieldInjection.foo is not a valid javax.inject.Provider."
             )
@@ -1260,11 +1261,11 @@ class FieldMemberInjectorTest {
             package test
             import javax.inject.Inject
             class TestMemberInjection {
-              class InnerSuperClass {
-                @Inject lateinit var foo: Foo
+              open class InnerSuperClass {
+                @Inject open lateinit var foo: Foo
               }
               class InnerClass : InnerSuperClass() {
-                @Inject lateinit var foo: Foo
+                @Inject override lateinit var foo: Foo
               }
             }
             class Foo
@@ -1296,8 +1297,7 @@ class FieldMemberInjectorTest {
               "RedundantVisibilityModifier",
               "UNCHECKED_CAST",
             )
-            public class `TestMemberInjection${'$'}InnerClass__MemberInjector` :
-                MemberInjector<TestMemberInjection.InnerClass> {
+            public class `TestMemberInjection${'$'}InnerClass__MemberInjector` : MemberInjector<TestMemberInjection.InnerClass> {
               private val superMemberInjector: MemberInjector<TestMemberInjection.InnerSuperClass> =
                   `TestMemberInjection${'$'}InnerSuperClass__MemberInjector`()
             
@@ -1311,7 +1311,7 @@ class FieldMemberInjectorTest {
 
     @Test
     fun testMemberInjection_shouldInjectAsAnInstanceOfSuperClass_whenSuperClassHasInjectedMembers_java() {
-        val source = javaSource(
+        val testMemberInjection = javaSource(
             "TestMemberInjection",
             """
             package test;
@@ -1319,15 +1319,30 @@ class FieldMemberInjectorTest {
             public class TestMemberInjection extends TestMemberInjectionParent {
               @Inject Foo foo;
             }
-            class TestMemberInjectionParent {
+            """
+        )
+
+        val testMemberInjectionParent = javaSource(
+            "TestMemberInjectionParent",
+            """
+            package test;
+            import javax.inject.Inject;
+            public class TestMemberInjectionParent {
               @Inject Foo foo;
             }
-            class Foo {}
+            """
+        )
+
+        val foo = javaSource(
+            "Foo",
+            """
+            package test;
+            public class Foo {}
             """
         )
 
         compilationAssert()
-            .that(source)
+            .that(testMemberInjection, testMemberInjectionParent, foo)
             .processedWith(MemberInjectorProcessorProvider())
             .compilesWithoutError()
             .generatesSources(
@@ -1343,10 +1358,10 @@ class FieldMemberInjectorTest {
             package test
             import javax.inject.Inject
             class TestMemberInjection : TestMemberInjectionParent() {
-              @Inject lateinit var foo: Foo
+              @Inject override lateinit var foo: Foo
             }
-            class TestMemberInjectionParent {
-              @Inject lateinit var foo: Foo
+            open class TestMemberInjectionParent {
+              @Inject open lateinit var foo: Foo
             }
             class Foo
             """
@@ -1390,7 +1405,7 @@ class FieldMemberInjectorTest {
 
     @Test
     fun testMemberInjection_shouldInjectAsAnInstanceOfSuperClass_whenSuperClassHasInjectedMembersAndTypeArgument_java() {
-        val source = javaSource(
+        val testMemberInjection = javaSource(
             "TestMemberInjection",
             """
             package test;
@@ -1398,20 +1413,34 @@ class FieldMemberInjectorTest {
             public class TestMemberInjection extends TestMemberInjectionParent<Integer> {
               @Inject Foo foo;
             }
-            class TestMemberInjectionParent<T> {
+            """
+        )
+
+        val testMemberInjectionParent = javaSource(
+            "TestMemberInjectionParent",
+            """
+            package test;
+            import javax.inject.Inject;
+            public class TestMemberInjectionParent<T> {
               @Inject Foo foo;
             }
-            class Foo {}
+            """
+        )
+
+        val foo = javaSource(
+            "Foo",
+            """
+            package test;
+            import javax.inject.Inject;
+            public class Foo {}
             """
         )
 
         compilationAssert()
-            .that(source)
+            .that(testMemberInjection, testMemberInjectionParent, foo)
             .processedWith(MemberInjectorProcessorProvider())
             .compilesWithoutError()
-            .generatesSources(
-                testMemberInjection_shouldInjectAsAnInstanceOfSuperClass_whenSuperClassHasInjectedMembersAndTypeArgument_expected
-            )
+            .generatesSources(testMemberInjection_shouldInjectAsAnInstanceOfSuperClass_whenSuperClassHasInjectedMembersAndTypeArgument_expected)
     }
 
     @Test
@@ -1422,10 +1451,10 @@ class FieldMemberInjectorTest {
             package test
             import javax.inject.Inject
             class TestMemberInjection : TestMemberInjectionParent<Integer>() {
-              @Inject lateinit var foo: Foo
+              @Inject override lateinit var foo: Foo
             }
-            class TestMemberInjectionParent<T> {
-              @Inject lateinit var foo: Foo
+            open class TestMemberInjectionParent<T> {
+              @Inject open lateinit var foo: Foo
             }
             class Foo
             """

@@ -22,6 +22,7 @@ import toothpick.compiler.compilationAssert
 import toothpick.compiler.compilesWithoutError
 import toothpick.compiler.expectedKtSource
 import toothpick.compiler.failsToCompile
+import toothpick.compiler.failsToProcess
 import toothpick.compiler.generatesSources
 import toothpick.compiler.javaSource
 import toothpick.compiler.ktSource
@@ -250,7 +251,7 @@ class MethodMemberInjectorTest {
             import toothpick.Lazy;
             public class TestMethodInjection {
               @Inject
-              public void m(Lazy<Foo> foo) {}
+              public void m(Lazy<Foo<Object>> foo) {}
             }
             class Foo<T> {}
             """
@@ -505,7 +506,7 @@ class MethodMemberInjectorTest {
         compilationAssert()
             .that(source)
             .processedWith(MemberInjectorProcessorProvider())
-            .failsToCompile()
+            .failsToProcess()
             .withLogContaining(
                 "Type of test.TestMethodInjection.m is not a valid toothpick.Lazy."
             )
@@ -530,7 +531,7 @@ class MethodMemberInjectorTest {
         compilationAssert()
             .that(source)
             .processedWith(MemberInjectorProcessorProvider())
-            .failsToCompile()
+            .failsToProcess()
             .withLogContaining(
                 "Type of test.TestMethodInjection.m is not a valid toothpick.Lazy."
             )
@@ -556,7 +557,7 @@ class MethodMemberInjectorTest {
         compilationAssert()
             .that(source)
             .processedWith(MemberInjectorProcessorProvider())
-            .failsToCompile()
+            .failsToProcess()
             .withLogContaining(
                 "Type of test.TestMethodInjection.m is not a valid javax.inject.Provider."
             )
@@ -581,7 +582,7 @@ class MethodMemberInjectorTest {
         compilationAssert()
             .that(source)
             .processedWith(MemberInjectorProcessorProvider())
-            .failsToCompile()
+            .failsToProcess()
             .withLogContaining(
                 "Type of test.TestMethodInjection.m is not a valid javax.inject.Provider."
             )
@@ -620,12 +621,12 @@ class MethodMemberInjectorTest {
             """
             package test
             import javax.inject.Inject
-            class TestMethodInjectionParent {
+            open class TestMethodInjectionParent {
               @Inject
-              fun m(foo: Foo) {}
+              open fun m(foo: Foo) {}
               class TestMethodInjection : TestMethodInjectionParent() {
                 @Inject
-                fun m(foo: Foo) {}
+                override fun m(foo: Foo) {}
               }
             }
             class Foo
@@ -654,8 +655,7 @@ class MethodMemberInjectorTest {
               "RedundantVisibilityModifier",
               "UNCHECKED_CAST",
             )
-            public class `TestMethodInjectionParent${'$'}TestMethodInjection__MemberInjector` :
-                MemberInjector<TestMethodInjectionParent.TestMethodInjection> {
+            public class `TestMethodInjectionParent${'$'}TestMethodInjection__MemberInjector` : MemberInjector<TestMethodInjectionParent.TestMethodInjection> {
               private val superMemberInjector: MemberInjector<TestMethodInjectionParent> =
                   TestMethodInjectionParent__MemberInjector()
             

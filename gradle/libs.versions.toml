@@ -1,18 +1,17 @@
 [versions]
-kotlinpoet = "1.18.1"
-compiletesting = "1.6.0"
+kotlinpoet = "2.2.0"
+compiletesting = "0.12.1"
 
 [libraries]
-compiletesting-kt = { module = "com.github.tschuchortdev:kotlin-compile-testing", version.ref = "compiletesting" }
-compiletesting-ksp = { module = "com.github.tschuchortdev:kotlin-compile-testing-ksp", version.ref = "compiletesting" }
+compiletesting-kt = { module = "dev.zacsweers.kctfork:core", version.ref = "compiletesting" }
+compiletesting-ksp = { module = "dev.zacsweers.kctfork:ksp", version.ref = "compiletesting" }
 inject = "javax.inject:javax.inject:1"
 junit4 = "junit:junit:4.13.2"
 kotlinpoet-core = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
 kotlinpoet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlinpoet" }
-ksp = "com.google.devtools.ksp:symbol-processing-api:2.0.10-1.0.24"
+ksp = "com.google.devtools.ksp:symbol-processing-api:2.3.4"
 tp = "com.github.stephanenicolas.toothpick:toothpick:3.1.0"
 
 [plugins]
-kotlin = { id = "org.jetbrains.kotlin.jvm", version = "2.0.10" }
-kover = { id = "org.jetbrains.kotlinx.kover", version = "0.8.3" }
-spotless = { id = "com.diffplug.gradle.spotless", version = "6.2.0" }
+kotlin = { id = "org.jetbrains.kotlin.jvm", version = "2.3.0" }
+kover = { id = "org.jetbrains.kotlinx.kover", version = "0.9.4" }

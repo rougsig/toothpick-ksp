@@ -20,11 +20,12 @@
 package toothpick.compiler
 
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
+import com.tschuchort.compiletesting.JvmCompilationResult
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
-import com.tschuchort.compiletesting.kspArgs
+import com.tschuchort.compiletesting.configureKsp
+import com.tschuchort.compiletesting.kspProcessorOptions
 import com.tschuchort.compiletesting.kspSourcesDir
-import com.tschuchort.compiletesting.symbolProcessorProviders
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -45,7 +46,7 @@ data class AssertCompilable(
 
 data class AssertCompiled(
     val compilable: AssertCompilable,
-    val result: KotlinCompilation.Result
+    val result: JvmCompilationResult
 )
 
 fun compilationAssert(): AssertInitial = AssertInitial()
@@ -62,7 +63,7 @@ fun AssertInitial.withOptions(vararg kspOptions: Pair<String, String>): AssertIn
 fun AssertInitial.logVerbose(): AssertInitial =
     copy(logVerbose = true)
 
-private fun AssertInitial.asCompilation(): AssertCompilable {
+fun AssertInitial.asCompilation(): AssertCompilable {
     val builder = this
     return AssertCompilable(
         initial = this,
@@ -70,8 +71,11 @@ private fun AssertInitial.asCompilation(): AssertCompilable {
             inheritClassPath = true
             verbose = logVerbose
             sources = builder.sources
-            symbolProcessorProviders = builder.symbolProcessorProviders
-            kspArgs = kspOptions.toMutableMap()
+
+            configureKsp {
+                symbolProcessorProviders += builder.symbolProcessorProviders
+                kspProcessorOptions += kspOptions
+            }
         }
     )
 }
@@ -95,6 +99,13 @@ fun AssertInitial.failsToCompile(): AssertCompiled =
         .compile()
         .apply {
             assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
+        }
+
+fun AssertInitial.failsToProcess(): AssertCompiled =
+    asCompilation()
+        .compile()
+        .apply {
+            assertEquals(KotlinCompilation.ExitCode.INTERNAL_ERROR, result.exitCode)
         }
 
 fun AssertCompiled.withLogContaining(expected: String) = apply {

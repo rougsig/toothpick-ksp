@@ -247,8 +247,7 @@ class FactoryAndMemberInjectorTests {
               "ClassName",
               "RedundantVisibilityModifier",
             )
-            public class `TestAInnerClassThatNeedsInjection${'$'}InnerClass__Factory` :
-                Factory<TestAInnerClassThatNeedsInjection.InnerClass> {
+            public class `TestAInnerClassThatNeedsInjection${'$'}InnerClass__Factory` : Factory<TestAInnerClassThatNeedsInjection.InnerClass> {
               private val memberInjector: MemberInjector<TestAInnerClassThatNeedsInjection.InnerClass> =
                   `TestAInnerClassThatNeedsInjection${'$'}InnerClass__MemberInjector`()
             
@@ -300,7 +299,7 @@ class FactoryAndMemberInjectorTests {
 
     @Test
     fun testAClassThatInheritFromAnotherClassThatNeedsInjection_shouldHaveAFactoryThatInjectsIt_whenItHasAnAnnotatedConstructor_andShouldUseSuperMemberInjector_java() {
-        val source = javaSource(
+        val testAClassThatNeedsInjection = javaSource(
             "TestAClassThatNeedsInjection",
             """
             package test;
@@ -308,7 +307,15 @@ class FactoryAndMemberInjectorTests {
             public class TestAClassThatNeedsInjection extends SuperClassThatNeedsInjection {
               @Inject public TestAClassThatNeedsInjection() {}
             }
-            class SuperClassThatNeedsInjection {
+            """
+        )
+
+        val superClassThatNeedsInjection = javaSource(
+            "SuperClassThatNeedsInjection",
+            """
+            package test;
+            import javax.inject.Inject;
+            public class SuperClassThatNeedsInjection {
               @Inject String s;
               public SuperClassThatNeedsInjection() {}
             }
@@ -316,7 +323,7 @@ class FactoryAndMemberInjectorTests {
         )
 
         compilationAssert()
-            .that(source)
+            .that(testAClassThatNeedsInjection, superClassThatNeedsInjection)
             .processedWith(FactoryProcessorProvider(), MemberInjectorProcessorProvider())
             .compilesWithoutError()
             .generatesSources(
@@ -332,7 +339,7 @@ class FactoryAndMemberInjectorTests {
             package test
             import javax.inject.Inject
             class TestAClassThatNeedsInjection @Inject constructor(): SuperClassThatNeedsInjection()
-            class SuperClassThatNeedsInjection {
+            open class SuperClassThatNeedsInjection {
               @Inject lateinit var s: String
             }
             """

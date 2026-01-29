@@ -33,10 +33,8 @@ import com.google.devtools.ksp.symbol.KSTypeAlias
 import com.google.devtools.ksp.symbol.KSValueParameter
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.ParameterizedTypeName
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeName
-import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import toothpick.compiler.common.generators.error
 import javax.inject.Named
@@ -94,8 +92,8 @@ sealed class VariableInjectionTarget(
                     val kindParamClass = type.getInjectedType()
 
                     Provider(
-                        className = kindParamClass.toClassName(),
-                        typeName = type.toParameterizedTypeName(kindParamClass),
+                        className = kindParamClass.declaration.toClassName(),
+                        typeName = type.toTypeName(),
                         memberName = name,
                         qualifierName = qualifierName
                     )
@@ -104,8 +102,8 @@ sealed class VariableInjectionTarget(
                     val kindParamClass = type.getInjectedType()
 
                     Lazy(
-                        className = kindParamClass.toClassName(),
-                        typeName = type.toParameterizedTypeName(kindParamClass),
+                        className = kindParamClass.declaration.toClassName(),
+                        typeName = type.toTypeName(),
                         memberName = name,
                         qualifierName = qualifierName
                     )
@@ -115,7 +113,7 @@ sealed class VariableInjectionTarget(
 
         private fun createInstanceTarget(name: KSName, type: KSType, qualifierName: String?): Instance {
             return if (type.declaration is KSTypeAlias) {
-                val actualTypeClassName = type.findActualType().toClassName()
+                val actualTypeClassName = type.findActualType().declaration.toClassName()
                 val argumentsTypeNames = type.arguments.map { it.type!!.resolve().toTypeName() }
 
                 val typeName = if (argumentsTypeNames.isNotEmpty()) {
@@ -132,16 +130,13 @@ sealed class VariableInjectionTarget(
                 )
             } else {
                 Instance(
-                    className = type.toClassName(),
+                    className = type.declaration.toClassName(),
                     typeName = type.toTypeName(),
                     memberName = name,
                     qualifierName = qualifierName
                 )
             }
         }
-
-        private fun KSType.toParameterizedTypeName(kindParamClass: KSType): ParameterizedTypeName =
-            toClassName().parameterizedBy(kindParamClass.toTypeName())
 
         /**
          * Lookup both [javax.inject.Qualifier] and [javax.inject.Named] to provide the name

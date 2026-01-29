@@ -34,6 +34,7 @@ import com.google.devtools.ksp.symbol.KSNode
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeAlias
 import com.google.devtools.ksp.symbol.Variance
+import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
 import toothpick.compiler.common.generators.TPCodeGenerator
 import toothpick.compiler.common.generators.error
@@ -152,8 +153,11 @@ abstract class ToothpickProcessor(
 
     private fun KSClassDeclaration.hasInjectAnnotatedMembers(): Boolean {
         // Ignore overridden members. They will be injected by the parent MemberInjector.
-        return getAllFunctions().filter { function -> function.findOverridee() == null && !function.isConstructor() }
+        return getAllFunctions()
+            .filter { function -> function.findOverridee() == null && !function.isConstructor() }
             .plus(getAllProperties().filter { property -> property.findOverridee() == null })
+            // Only include members declared in this class
+            .filter { it.parentDeclaration == this }
             .any { member -> member.isAnnotationPresent(Inject::class) }
     }
 

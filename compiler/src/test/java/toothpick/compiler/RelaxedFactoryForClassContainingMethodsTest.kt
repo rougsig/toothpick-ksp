@@ -81,8 +81,7 @@ class RelaxedFactoryForClassContainingMethodsTest {
               "ClassName",
               "RedundantVisibilityModifier",
             )
-            public class TestRelaxedFactoryCreationForInjectMethod__Factory :
-                Factory<TestRelaxedFactoryCreationForInjectMethod> {
+            public class TestRelaxedFactoryCreationForInjectMethod__Factory : Factory<TestRelaxedFactoryCreationForInjectMethod> {
               private val memberInjector: MemberInjector<TestRelaxedFactoryCreationForInjectMethod> =
                   TestRelaxedFactoryCreationForInjectMethod__MemberInjector()
             
@@ -225,7 +224,7 @@ class RelaxedFactoryForClassContainingMethodsTest {
         compilationAssert()
             .that(source)
             .processedWith(FactoryProcessorProvider(), MemberInjectorProcessorProvider())
-            .failsToCompile()
+            .failsToProcess()
             .withLogContaining(
                 "Type of test.TestRelaxedFactoryCreationForInjectMethod.m is not a valid toothpick.Lazy."
             )
@@ -249,7 +248,7 @@ class RelaxedFactoryForClassContainingMethodsTest {
         compilationAssert()
             .that(source)
             .processedWith(FactoryProcessorProvider(), MemberInjectorProcessorProvider())
-            .failsToCompile()
+            .failsToProcess()
             .withLogContaining(
                 "Type of test.TestRelaxedFactoryCreationForInjectMethod.m is not a valid toothpick.Lazy."
             )
@@ -274,7 +273,7 @@ class RelaxedFactoryForClassContainingMethodsTest {
         compilationAssert()
             .that(source)
             .processedWith(FactoryProcessorProvider(), MemberInjectorProcessorProvider())
-            .failsToCompile()
+            .failsToProcess()
             .withLogContaining(
                 "Type of test.TestRelaxedFactoryCreationForInjectMethod.m is not a valid javax.inject.Provider."
             )
@@ -298,7 +297,7 @@ class RelaxedFactoryForClassContainingMethodsTest {
         compilationAssert()
             .that(source)
             .processedWith(FactoryProcessorProvider(), MemberInjectorProcessorProvider())
-            .failsToCompile()
+            .failsToProcess()
             .withLogContaining(
                 "Type of test.TestRelaxedFactoryCreationForInjectMethod.m is not a valid javax.inject.Provider."
             )

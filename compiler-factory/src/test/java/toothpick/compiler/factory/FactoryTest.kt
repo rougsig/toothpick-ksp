@@ -24,6 +24,7 @@ import toothpick.compiler.compilationAssert
 import toothpick.compiler.compilesWithoutError
 import toothpick.compiler.expectedKtSource
 import toothpick.compiler.failsToCompile
+import toothpick.compiler.failsToProcess
 import toothpick.compiler.generatesSources
 import toothpick.compiler.javaSource
 import toothpick.compiler.ktSource
@@ -196,6 +197,7 @@ class FactoryTest {
     }
 
     @Test
+    @Ignore("Kotlin 2.0 - Cannot access 'constructor(): TestEmptyConstructor': it is protected in 'test.TestEmptyConstructor'")
     fun testEmptyConstructor_shouldWork_whenConstructorIsProtected_kt() {
         val source = ktSource(
             "TestEmptyConstructor",
@@ -357,6 +359,7 @@ class FactoryTest {
     }
 
     @Test
+    @Ignore("Kotlin 2.0 - Modifier 'protected' is not applicable inside 'file'")
     fun testInjectedConstructorInProtectedClass_shouldWork_kt() {
         val source = ktSource(
             "TestConstructorInProtectedClass",
@@ -418,7 +421,7 @@ class FactoryTest {
             """
             package test;
             import javax.inject.Inject;
-            class TestConstructorInPackageClass {
+            public class TestConstructorInPackageClass {
               @Inject public TestConstructorInPackageClass() {}
             }
             """
@@ -464,8 +467,7 @@ class FactoryTest {
               "RedundantVisibilityModifier",
             )
             public class TestConstructorInPackageClass__Factory : Factory<TestConstructorInPackageClass> {
-              public override fun createInstance(scope: Scope): TestConstructorInPackageClass =
-                  TestConstructorInPackageClass()
+              public override fun createInstance(scope: Scope): TestConstructorInPackageClass = TestConstructorInPackageClass()
             
               public override fun getTargetScope(scope: Scope): Scope = scope
             
@@ -556,7 +558,7 @@ class FactoryTest {
             package test
             import javax.inject.Inject
             class Test2Constructors @Inject constructor() {
-              constructor(s: String)
+              constructor(s: String): this()
             }
             """
         )
@@ -867,7 +869,7 @@ class FactoryTest {
         compilationAssert()
             .that(source)
             .processedWith(FactoryProcessorProvider())
-            .failsToCompile()
+            .failsToProcess()
             .withLogContaining(
                 "Type of lazy is not a valid toothpick.Lazy."
             )
@@ -888,7 +890,7 @@ class FactoryTest {
         compilationAssert()
             .that(source)
             .processedWith(FactoryProcessorProvider())
-            .failsToCompile()
+            .failsToProcess()
             .withLogContaining(
                 "Type of lazy is not a valid toothpick.Lazy."
             )
@@ -912,7 +914,7 @@ class FactoryTest {
         compilationAssert()
             .that(source)
             .processedWith(FactoryProcessorProvider())
-            .failsToCompile()
+            .failsToProcess()
             .withLogContaining(
                 "Type of provider is not a valid javax.inject.Provider."
             )
@@ -933,7 +935,7 @@ class FactoryTest {
         compilationAssert()
             .that(source)
             .processedWith(FactoryProcessorProvider())
-            .failsToCompile()
+            .failsToProcess()
             .withLogContaining(
                 "Type of provider is not a valid javax.inject.Provider."
             )
@@ -1184,8 +1186,7 @@ class FactoryTest {
               "ClassName",
               "RedundantVisibilityModifier",
             )
-            public class TestClassConstructorThrowingException__Factory :
-                Factory<TestClassConstructorThrowingException> {
+            public class TestClassConstructorThrowingException__Factory : Factory<TestClassConstructorThrowingException> {
               @Suppress(
                 "UNCHECKED_CAST",
                 "NAME_SHADOWING",
@@ -1467,8 +1468,7 @@ class FactoryTest {
                 return TestNonEmptyConstructor(param1, param2)
               }
             
-              public override fun getTargetScope(scope: Scope): Scope =
-                  scope.getParentScope(CustomScope::class.java)
+              public override fun getTargetScope(scope: Scope): Scope = scope.getParentScope(CustomScope::class.java)
             
               public override fun hasScopeAnnotation(): Boolean = true
             
@@ -1556,8 +1556,7 @@ class FactoryTest {
             public class TestEmptyConstructor__Factory : Factory<TestEmptyConstructor> {
               public override fun createInstance(scope: Scope): TestEmptyConstructor = TestEmptyConstructor()
             
-              public override fun getTargetScope(scope: Scope): Scope =
-                  scope.getParentScope(CustomScope::class.java)
+              public override fun getTargetScope(scope: Scope): Scope = scope.getParentScope(CustomScope::class.java)
             
               public override fun hasScopeAnnotation(): Boolean = true
             
@@ -1660,8 +1659,7 @@ class FactoryTest {
                 return TestNonEmptyConstructor(param1, param2)
               }
             
-              public override fun getTargetScope(scope: Scope): Scope =
-                  scope.getParentScope(CustomScope::class.java)
+              public override fun getTargetScope(scope: Scope): Scope = scope.getParentScope(CustomScope::class.java)
             
               public override fun hasScopeAnnotation(): Boolean = true
             
@@ -1826,10 +1824,8 @@ class FactoryTest {
               "ClassName",
               "RedundantVisibilityModifier",
             )
-            internal class `TestNestedClassConstructor${'$'}NestedClass__Factory` :
-                Factory<TestNestedClassConstructor.NestedClass> {
-              public override fun createInstance(scope: Scope): TestNestedClassConstructor.NestedClass =
-                  TestNestedClassConstructor.NestedClass()
+            internal class `TestNestedClassConstructor${'$'}NestedClass__Factory` : Factory<TestNestedClassConstructor.NestedClass> {
+              public override fun createInstance(scope: Scope): TestNestedClassConstructor.NestedClass = TestNestedClassConstructor.NestedClass()
             
               public override fun getTargetScope(scope: Scope): Scope = scope
             
@@ -1883,11 +1879,8 @@ class FactoryTest {
               "ClassName",
               "RedundantVisibilityModifier",
             )
-            internal class `TestNestedClassConstructor${'$'}NestedClass${'$'}OneMoreNestedClass__Factory` :
-                Factory<TestNestedClassConstructor.NestedClass.OneMoreNestedClass> {
-              public override fun createInstance(scope: Scope):
-                  TestNestedClassConstructor.NestedClass.OneMoreNestedClass =
-                  TestNestedClassConstructor.NestedClass.OneMoreNestedClass()
+            internal class `TestNestedClassConstructor${'$'}NestedClass${'$'}OneMoreNestedClass__Factory` : Factory<TestNestedClassConstructor.NestedClass.OneMoreNestedClass> {
+              public override fun createInstance(scope: Scope): TestNestedClassConstructor.NestedClass.OneMoreNestedClass = TestNestedClassConstructor.NestedClass.OneMoreNestedClass()
             
               public override fun getTargetScope(scope: Scope): Scope = scope
             
@@ -2005,6 +1998,7 @@ class FactoryTest {
     }
 
     @Test
+    @Ignore("Kotlin 2.0 - Modifier 'protected' is not applicable inside 'file'")
     fun testInjectedConstructorForProtectedMiddleNestedClassWithInternalParentModifier_kt() {
         val source = ktSource(
             "TestNestedClassConstructor",

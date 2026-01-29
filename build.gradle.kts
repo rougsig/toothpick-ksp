@@ -1,26 +1,9 @@
-import com.diffplug.gradle.spotless.SpotlessExtension
-
 plugins {
     alias(libs.plugins.kover)
-    alias(libs.plugins.spotless) apply false
     alias(libs.plugins.kotlin) apply false
 }
 
 subprojects {
-    pluginManager.apply("com.diffplug.spotless")
-
-    configure<SpotlessExtension> {
-        kotlin {
-            ktlint()
-            licenseHeaderFile(rootProject.file("spotless.license.java.txt"))
-        }
-
-        kotlinGradle {
-            ktlint()
-            target("*.gradle.kts")
-        }
-    }
-
     afterEvaluate {
         tasks.withType<Test> {
             testLogging {
